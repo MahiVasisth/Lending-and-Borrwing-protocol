@@ -8,11 +8,10 @@ contract DeployCollateralLending is Script{
     OurToken public token;
     function run() external returns(OurToken,CollateralLending){
         vm.startBroadcast();
-        OurToken public token;
         token = new OurToken(1000e18);
         CollateralLending lending = new CollateralLending(address(token));
         vm.stopBroadcast();
-        return token , lending;
+        return (token,lending);
 
     }
 }

@@ -58,14 +58,14 @@ contract CollateralLending is ILending{
 
     /**
      * @notice Allows users to deposit tokens into the contract.
-     * @param _amount The amount of tokens to deposit.
      */
-    function depositToken(uint256 _amount) external check_for_zero_amount( _amount){
-     s_balanceOf[msg.sender]+=_amount;
-     s_totalbalance+=_amount;
-     token.safeTransfer(address(this),_amount);
-    emit depositer(msg.sender , _amount);
-    }
+   
+    function depositToken(uint256 _amount) external payable check_for_zero_amount(_amount){
+      token.transferFrom(msg.sender,address(this),_amount);
+      s_balanceOf[msg.sender]+=_amount;
+      s_totalbalance+=_amount;
+      emit depositer(msg.sender , s_balanceOf[msg.sender]);
+     } 
 
     /**
      * @notice Allows users to withdraw their tokens from the contract.
@@ -73,12 +73,13 @@ contract CollateralLending is ILending{
      * @dev Requires that the user has enough balance to withdraw.
      */
     function withdrawToken(uint256 _amount) external check_for_zero_amount(_amount) {
-        if(_amount > s_balanceOf[msg.sender]){
+      console.log(s_balanceOf[msg.sender]);  
+      if(_amount > s_balanceOf[msg.sender]){
         revert withdraw_amount_is_greater_then_deposit_amount();
         }
         s_balanceOf[msg.sender]-=_amount;
         s_totalbalance-=_amount;
-        token.safeTransfer(msg.sender ,_amount);
+        token.transfer(msg.sender ,_amount);
         emit withdrawer(msg.sender ,  _amount);
         }
 
@@ -95,7 +96,7 @@ contract CollateralLending is ILending{
         revert not_enough_balance_in_contract();
      }
      s_borrowamount[msg.sender] += _tokenAmount;
-     token.safeTransfer( msg.sender , _tokenAmount);
+     token.transfer( msg.sender , _tokenAmount);
      emit borrower(msg.sender , _tokenAmount);
     }
 
@@ -110,27 +111,27 @@ contract CollateralLending is ILending{
          revert you_are_repay_more_then_borrow();
        }       
        s_borrowamount[msg.sender]-=_tokenAmount;
-       token.safeTransferFrom(msg.sender , address(this), _tokenAmount);
-       token.safeTransfer(msg.sender , _tokenAmount * collateral_factor / 100);
+       token.transferFrom(msg.sender , address(this), _tokenAmount);
+       token.transfer( msg.sender , _tokenAmount * collateral_factor / 100);
        emit repayer(msg.sender , _tokenAmount);
     }
 
     /**
      * @notice Allows for the liquidation of a borrower's collateral if they fail to maintain the required collateral factor.
-     * @param borrower The address of the borrower.
+     * @param _borrower The address of the borrower.
      * @param _tokenAmount The amount of tokens to be liquidated.
      * @dev Requires that the borrower's collateral is less than the required amount and that they have borrowed the specified token amount.
      */
-    function liquidate(address borrower, uint256 _tokenAmount) external payable check_for_zero_amount(_tokenAmount) {
-        if(msg.value > _tokenAmount * collateral_factor / 100){
+    function liquidate(address _borrower, uint256 _tokenAmount) external payable check_for_zero_amount(_tokenAmount) {
+        if(s_balanceOf[_borrower] > _tokenAmount * collateral_factor / 100){
             revert already_have_enough_collateral_provided();
         }
-       if(_tokenAmount<s_borrowamount[msg.sender] ){
+       if(_tokenAmount < s_borrowamount[_borrower] ){
          revert borrowamountmustbelessthenliquidateamount();
        }
-       s_borrowamount[msg.sender]-=_tokenAmount; 
-       token.safeTransfer(address(this), _tokenAmount);
-       token.safeTransfer(msg.sender , msg.value);
+       s_borrowamount[_borrower]-=_tokenAmount; 
+       token.transferFrom(_borrower ,address(this), _tokenAmount);
+       token.transfer(_borrower , msg.value);
         // emit liquidate(msg.sender , _tokenAmount);
     }
 receive() external payable {}

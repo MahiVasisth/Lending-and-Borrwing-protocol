@@ -17,4 +17,6 @@ contract ILending {
    error already_have_enough_collateral_provided();
    error borrowamountmustbelessthenliquidateamount();
    error you_are_repay_more_then_borrow();
-}
+   error repay_amount_notequal_to_borrowed_amount();
+
+} 
