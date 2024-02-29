@@ -7,6 +7,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {OurToken} from "../src/OurToken.sol";
 
 contract LendingTest is Test {
    using SafeERC20 for IERC20;
