@@ -11,9 +11,10 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 contract LendingTest is Test {
    using SafeERC20 for IERC20;
     Lending public lending;
+    OurToken public token;
     address User = makeAddr("User");
     function setUp() public {
-    lending = new Lending(0x5932aB857F0e9B5D412E9411A1f67CD99667b7BB);
+    lending = new Lending(token);
     payable(User).transfer(150 ether);
     // payable(address(lending)).transfer(1500 ether);  
   }
